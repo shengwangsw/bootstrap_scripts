@@ -16,11 +16,16 @@ ohmyzshAndTmux() {
       echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
 
       # update ohmyzsh
-      #sed -i '/ZSH_THEME="robbyrussell"/c\ZSH_THEME="agnoster"' ~/.zshrc
-      #sed -i 's/agnoster/robbyrussell/' ~/.zshrc
-      # TODO
-
-      # fix problem related to https://github.com/ohmyzsh/ohmyzsh/issues/6835#issuecomment-390216875
+      sed 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/g' ~/.zshrc
+      if grep -q "ZSH_THEME=\"robbyrussell\"" ~/.zshrc; then
+        sed 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/g' ~/.zshrc > zshrc.txt
+        cp zshrc.txt ~/.zshrc
+        rm zshrc.txt
+      else 
+        echo "failed updating zsh theme, not existing line: ZSH_THEME=\"robbyrussell\""
+      fi
+      # permission issues https://github.com/ohmyzsh/ohmyzsh/issues/6835#issuecomment-390216875
+      echo "skip fixing permission issues..."
       #echo "ZSH_DISABLE_COMPFIX=true" >> ~/.zshrc
       # TODO the variable must be before oh-my-zsh.sh is sourced.
     fi
@@ -35,10 +40,32 @@ ohmyzshAndTmux() {
     else
       git clone https://github.com/samoshkin/tmux-config.git
       ./tmux-config/install.sh
+
       # remove the project
       rm -rf tmux-config
+
       # fix bug (add backslash before {, } and \)
-      # TODO
+      if grep -q "unbind }    # swap-pane -D" ~/.tmux.conf; then
+        sed 's/unbind }    # swap-pane -D/unbind \\}    # swap-pane -D/g' ~/.tmux.conf > tmux.txt
+        cp tmux.txt ~/.tmux.conf
+        rm tmux.txt
+      else 
+        echo "failed fixing, not existing line: unbind }    # swap-pane -D"
+      fi
+      if grep -q "unbind {    # swap-pane -U" ~/.tmux.conf; then
+        sed 's/unbind {    # swap-pane -U/unbind \\{    # swap-pane -U/g' ~/.tmux.conf > tmux.txt
+        cp tmux.txt ~/.tmux.conf
+        rm tmux.txt
+      else 
+        echo "failed fixing, not existing line: unbind {    # swap-pane -U"
+      fi
+      if grep -q "bind \\\\ if" ~/.tmux.conf; then
+        sed 's/bind \\ if/bind \\\\ if/g' ~/.tmux.conf > tmux.txt
+        cp tmux.txt ~/.tmux.conf
+        rm tmux.txt
+      else 
+        echo "failed fixing, not existing line: bind \\ if"
+      fi
     fi
   fi
 }
