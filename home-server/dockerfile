@@ -1,0 +1,20 @@
+FROM alpine:3.13
+
+RUN apk update --no-cache\
+    && apk upgrade --no-cache\
+    && apk add bash curl openvpn openrc --no-cache\
+    && rc-update add openvpn default\
+    && echo "tun" >> /etc/modules\
+    && echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.d/ipv4.conf\
+    && sysctl -p /etc/sysctl.d/ipv4.conf
+
+# https://wiki.alpinelinux.org/wiki/Setting_up_a_OpenVPN_server
+# https://wiki.alpinelinux.org/wiki/Generating_SSL_certs_with_ACF
+
+# server.key RSA
+# server.csr CA
+# server.pem Public Certificate
+
+EXPOSE 1194
+
+ENTRYPOINT ["/bin/sh","-c","tail -f /dev/null"]
