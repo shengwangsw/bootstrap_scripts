@@ -131,6 +131,10 @@ ubuntu()
     fi
   done
 
+  # configure to use vi
+  echo "use vi on git commit"
+  git config --global core.editor "vi"
+
   # configure
   ohmyzshAndTmux
 
