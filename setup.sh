@@ -1,5 +1,7 @@
 #!/bin/sh
 
+TO_INSTALL="git ssh zsh curl tmux rust vim"
+
 # ohmyzsh
 ohmyzshAndTmux() {
   # install ohmyzsh
@@ -9,10 +11,11 @@ ohmyzshAndTmux() {
     if [ -f "~/.oh-my-zsh" ]; then
       echo "ohmyzsh is already installed"
     else
+      echo "Configuring ohmyzsh..."
       sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
       # intall Powerlevel10k for font
       git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
-      mv powerlevel10k ~/.powerlevel10k
+      mv ~/powerlevel10k ~/.powerlevel10k
       echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
 
       # update ohmyzsh
@@ -38,6 +41,7 @@ ohmyzshAndTmux() {
     if [ -f "~/.tmux" ]; then
       echo "tmux is already installed"
     else
+      echo "Configuring tmux..."
       git clone https://github.com/samoshkin/tmux-config.git
       ./tmux-config/install.sh
 
@@ -81,12 +85,12 @@ macos()
     echo “homebrew already installed”
   fi
   # new update and upgrade
+  echo "Updating and upgrading..."
   brew update
   brew upgrade
   
   # install git and ssh
-  toInstall = "git ssh zsh curl tmux rust vim"
-  for val in $toInstall; do
+  for val in $TO_INSTALL; do
     # command -v or which 
     if ! which $val &> /dev/null; then
       brew install $val
@@ -96,6 +100,7 @@ macos()
     fi
   done
 
+  # configure
   ohmyzshAndTmux
 
   # install vscode
@@ -104,24 +109,38 @@ macos()
   else
     echo "vscode already installed"
   fi
-
-  # install rust
-  if ! which cargo &> /dev/null; then
-    # install cargo and rust https://sourabhbajaj.com/mac-setup/Rust/
-    brew install rustup
-    # outdated: brew install --build-from-source rustup-init
-    if ! which rustc &> /dev/null; then
-      rustup-init
-    fi
-  else
-    echo "rust is already installed"
-  fi
+  echo "Finished"
 }
 
 # linux ubuntu
 ubuntu()
 {
-  echo “Detect Linux Ubunto”
+  echo “Detect Linux Ubuntu”
+  # update and upgrade
+  echo "Updating and upgrading..."
+  sudo apt-get update -y
+  sudo apt-get upgrade -y
+
+  # install git and ssh
+  for val in $TO_INSTALL; do
+    # command -v or which
+    if ! which $val &> /dev/null; then
+      sudo apt-get install $val -y
+    else
+      echo “$val already installed”
+    fi
+  done
+
+  # configure
+  ohmyzshAndTmux
+
+  # install vscode
+  if ! which code &> /dev/null; then
+    sudo snap install --classic code
+  else
+    echo "vscode already installed"
+  fi
+  echo "Finished"
 }
 
 # if macos
