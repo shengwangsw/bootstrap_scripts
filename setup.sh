@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TO_INSTALL="git ssh zsh curl tmux vim"
+TO_INSTALL="git ssh gpg zsh curl tmux vim"
 
 # ohmyzsh
 ohmyzshAndTmux() {
@@ -92,11 +92,65 @@ ohmyzshAndTmux() {
 # configure git
 setup_git()
 {
-  echo "use vim on git commit"
-  git config --global core.editor "vim"
-  # TODO 
-  # setup local git configuration (username and email)
-  # add ssh and gpg keypairs
+  if hash git 2> /dev/null; then
+    echo "use vim on git commit"
+    git config --global core.editor "vim"
+    echo "Write here your git username:"
+    read git_username
+    git config --global user.name "$git_username"
+    echo "Check your git username by executing: git config --global user.name"
+    echo "Write here your git email:"
+    read git_email
+    git config --global user.email "$git_email"
+    echo "Check your git email by executing: git config --global user.email"
+
+
+    if hash ssh-keygen 2> /dev/null; then
+      echo "Do you want to setup ssh keypair? [y/N]"
+      read ssh_keypair
+      if [ "$ssh_keypair" = "y" ] || [ "$ssh_keypair" = "Y" ]; then
+        ssh-keygen -t rsa
+        echo "Write here the path to your public key [e.g. ~/.ssh/id_rsa.pub]"
+        read ssh_pub_key
+        echo "copy the ssh public key to your git profile."
+        cat "$ssh_pub_key"
+        read -p "Press enter to continue"
+        read to_continue
+      else
+        echo "skip setting up ssh key pair"
+      fi
+    else
+      echo "ssh-keygen isn't installed"
+    fi
+    
+
+    if hash gpg 2> /dev/null; then
+      echo "Do you want to setup pgp keypair? [y/N]"
+      read pgp_keypair
+      if [ "$pgp_keypair" = "y" ] || [ "$pgp_keypair" = "Y" ]; then
+        gpg --full-gen-key
+        raw_signing_key=$(gpg --list-secret-keys --keyid-format LONG)
+        pattern='sec.*\/([a-zA-Z0-9]+).*'
+        [[ "$raw_signing_key" =~ $pattern ]]
+        signingkey=${BASH_REMATCH[1]};
+        gpg --export --armor "$signingkey"
+        echo "copy the pgp public key to your git profile."
+        read -p "Press enter to continue"
+        read to_continue
+
+        # setup in local machine
+        git config --global user.signingkey "$signingkey"
+        git config --global commit.gpgSign true
+        git config --global tag.gpgSign true
+      else
+        echo "skip setting up pgp key pair"
+      fi
+    else
+      echo "gpg isn't installed"
+    fi
+
+  else
+    echo "git is not installed. Skip configuring git."
 }
 
 # MacOS
