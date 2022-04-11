@@ -1,14 +1,13 @@
 #!/bin/sh
 
-TO_INSTALL="git ssh zsh curl tmux rust vim"
+TO_INSTALL="git ssh zsh curl tmux vim"
 
 # ohmyzsh
 ohmyzshAndTmux() {
-  # install ohmyzsh
+  # install ohmyzsh if zsh is installed
   if hash zsh 2> /dev/null; then
+    # if ~/.oh-my-zsh does not exist, then we assume that it is not configured
     if [ -f "~/.oh-my-zsh" ]; then
-      echo "ohmyzsh is already installed and configured"
-    else
       echo "Do you want to install oh-my-zsh [y/N]:"
       read zsh_option
       if [ "$zsh_option" = "y" ] || [ "$zsh_option" = "Y" ]; then
@@ -36,16 +35,17 @@ ohmyzshAndTmux() {
       else
         echo "Skip to configure ohmyzsh"
       fi
+    else
+      echo "ohmyzsh is already installed and configured"
     fi
   else
     echo "zsh hadn't been installed! Skip configuration"
   fi
 
-  # install tmux
+  # configure tmux if tmux is installed 
   if hash tmux 2> /dev/null; then
+    # if ~/.tmux does not exist, then we assume that it is not configured
     if [ -f "~/.tmux" ]; then
-      echo "tmux is already installed and configured"
-    else
       echo "Do you want to configure tmux [y/N]:"
       read tmux_option
       if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
@@ -81,6 +81,8 @@ ohmyzshAndTmux() {
       else
         echo "Skip to configure tmux"
       fi
+    else
+      echo "tmux is already installed and configured"
     fi
   else
     echo "tmux hadn't been installed! Skip configuration"
@@ -101,9 +103,13 @@ setup_git()
 macos()
 {
   echo “Detect Mac OS”
-  # install homebew
+  # install homebew if it is not already installed
   if hash brew 2> /dev/null; then
+    echo "homebrew already installed"
+  else
+    # usually curl is installed by default in MacOS
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
     echo "At the end of installation you should received next steps:"
     echo "1. add line to profile file:"
     echo "    echo 'eval \"$(/opt/homebrew/bin/brew shellenv)\"' >> <path to profile file>"
@@ -123,8 +129,6 @@ macos()
         exit 0;
       fi
     fi
-  else
-    echo “homebrew already installed”
   fi
   # new update and upgrade
   echo "Updating and upgrading..."
@@ -133,6 +137,8 @@ macos()
   
   for val in $TO_INSTALL; do
     if hash $val 2> /dev/null; then
+      echo "$val already installed"
+    else
       echo "Do you want to install $val [y/N]:"
       read val_option
       if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
@@ -140,20 +146,18 @@ macos()
       else
         echo "Skip to install $val"
       fi
-    else
-      echo "$val already installed"
     fi
   done
 
   # configure
   ohmyzshAndTmux
-  setup_git_ssh_and_gpg
+  setup_git
 
   # install vscode
   if hash code 2> /dev/null; then
-    brew install --cask visual-studio-code
-  else
     echo "vscode is already installed"
+  else
+    brew install --cask visual-studio-code
   fi
   echo "Finished"
 }
@@ -169,6 +173,8 @@ ubuntu()
 
   for val in $TO_INSTALL; do
     if hash $val 2> /dev/null; then
+      echo "$val already installed"
+    else
       echo "Do you want to install $val [y/N]:"
       read val_option
       if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
@@ -176,20 +182,18 @@ ubuntu()
       else
         echo "Skip to install $val"
       fi
-    else
-      echo "$val already installed"
     fi
   done
 
   # configure
   ohmyzshAndTmux
-  setup_git_ssh_and_gpg
+  setup_git
 
   # install vscode
   if hash code 2> /dev/null; then
-    sudo snap install --classic code
-  else
     echo "vscode is already installed"
+  else
+    sudo snap install --classic code
   fi
   echo "Finished"
 }
