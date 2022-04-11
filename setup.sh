@@ -114,7 +114,7 @@ setup_git() {
       read ssh_keypair
       if [ "$ssh_keypair" = "y" ] || [ "$ssh_keypair" = "Y" ]; then
         ssh-keygen -t rsa
-        echo "Write here the path to your public key [e.g. ~/.ssh/id_rsa.pub]"
+        echo "Write here the full path to your public key [e.g. /home/user/.ssh/id_rsa.pub]"
         read ssh_pub_key
         echo "copy the ssh public key to your git profile."
         cat "$ssh_pub_key"
@@ -216,7 +216,11 @@ macos()
   if hash code 2> /dev/null; then
     echo "vscode is already installed"
   else
-    brew install --cask visual-studio-code
+    echo "Do you want to install vscode [y/N]:"
+    read code_option
+    if [ "$code_option" = "y" ] || [ "$code_option" = "Y" ]; then
+      brew install --cask visual-studio-code
+    fi
   fi
   echo "Finished"
 }
@@ -252,7 +256,11 @@ ubuntu()
   if hash code 2> /dev/null; then
     echo "vscode is already installed"
   else
-    sudo snap install --classic code
+    echo "Do you want to install vscode [y/N]:"
+    read code_option
+    if [ "$code_option" = "y" ] || [ "$code_option" = "Y" ]; then
+      sudo snap install --classic code
+    fi
   fi
   echo "Finished"
 }
