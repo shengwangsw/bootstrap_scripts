@@ -87,11 +87,14 @@ ohmyzshAndTmux() {
   fi
 }
 
-# configure to use vi
-configure_git_to_use_vim()
+# configure git
+setup_git()
 {
   echo "use vim on git commit"
   git config --global core.editor "vim"
+  # TODO 
+  # setup local git configuration (username and email)
+  # add ssh and gpg keypairs
 }
 
 # MacOS
@@ -99,8 +102,27 @@ macos()
 {
   echo “Detect Mac OS”
   # install homebew
-  if ! which brew &> /dev/null; then
+  if hash brew 2> /dev/null; then
     bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo "At the end of installation you should received next steps:"
+    echo "1. add line to profile file:"
+    echo "    echo 'eval \"$(/opt/homebrew/bin/brew shellenv)\"' >> <path to profile file>"
+    echo "2. evaluate the brew shellenv:"
+    echo "    eval \"$(/opt/homebrew/bin/brew shellenv)\""
+    echo "Did you received the above steps? [y/N]"
+    read brew_steps
+    if [ "$brew_steps" = "y" ] || [ "$brew_steps" = "Y" ]; then
+      echo "Write here the <path to profile file>:"
+      read profile_file_path
+      echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$profile_file_path"
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    else
+      echo "Do you want to exit the setup so you can do it manually? [y/N]"
+      read do_it_manually
+      if [ "$do_it_manually" = "y" ] || [ "$do_it_manually" = "Y" ]; then
+        exit 0;
+      fi
+    fi
   else
     echo “homebrew already installed”
   fi
@@ -124,14 +146,14 @@ macos()
   done
 
   # configure
-  configure_git_to_use_vim
   ohmyzshAndTmux
+  setup_git_ssh_and_gpg
 
   # install vscode
-  if ! which code &> /dev/null; then
+  if hash code 2> /dev/null; then
     brew install --cask visual-studio-code
   else
-    echo "vscode already installed"
+    echo "vscode is already installed"
   fi
   echo "Finished"
 }
@@ -160,14 +182,14 @@ ubuntu()
   done
 
   # configure
-  configure_git_to_use_vim
   ohmyzshAndTmux
+  setup_git_ssh_and_gpg
 
   # install vscode
-  if ! which code &> /dev/null; then
+  if hash code 2> /dev/null; then
     sudo snap install --classic code
   else
-    echo "vscode already installed"
+    echo "vscode is already installed"
   fi
   echo "Finished"
 }
