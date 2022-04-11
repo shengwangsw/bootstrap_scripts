@@ -208,6 +208,13 @@ macos()
     fi
   done
 
+  # install windows manager
+  echo "Do you want to install rectangle? [y/N]"
+  read rectangle_windows_manager
+  if [ "$rectangle_windows_manager" = "y" ] || [ "$rectangle_windows_manager" = "Y" ]; then
+    brew install --cask rectangle
+  fi
+
   # configure
   ohmyzshAndTmux
   setup_git
