@@ -90,19 +90,23 @@ ohmyzshAndTmux() {
 }
 
 # configure git
-setup_git()
-{
+setup_git() {
   if hash git 2> /dev/null; then
-    echo "use vim on git commit"
-    git config --global core.editor "vim"
-    echo "Write here your git username:"
-    read git_username
-    git config --global user.name "$git_username"
-    echo "Check your git username by executing: git config --global user.name"
-    echo "Write here your git email:"
-    read git_email
-    git config --global user.email "$git_email"
-    echo "Check your git email by executing: git config --global user.email"
+
+    echo "Set git username, email, and commit to use vim [y/N]"
+    read git_config
+    if [ "$git_config" = "y" ] || [ "$git_config" = "Y" ]; then
+      echo "use vim on git commit"
+      git config --global core.editor "vim"
+      echo "Write here your git username:"
+      read git_username
+      git config --global user.name "$git_username"
+      echo "Check your git username by executing: git config --global user.name"
+      echo "Write here your git email:"
+      read git_email
+      git config --global user.email "$git_email"
+      echo "Check your git email by executing: git config --global user.email"
+    fi
 
     # setting up ssh key pair
     if hash ssh-keygen 2> /dev/null; then
