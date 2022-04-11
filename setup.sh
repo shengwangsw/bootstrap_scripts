@@ -5,73 +5,93 @@ TO_INSTALL="git ssh zsh curl tmux rust vim"
 # ohmyzsh
 ohmyzshAndTmux() {
   # install ohmyzsh
-  if ! which zsh &> /dev/null; then
-    echo "zsh is not installed"
-  else
+  if hash zsh 2> /dev/null; then
     if [ -f "~/.oh-my-zsh" ]; then
-      echo "ohmyzsh is already installed"
+      echo "ohmyzsh is already installed and configured"
     else
-      echo "Configuring ohmyzsh..."
-      sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-      # intall Powerlevel10k for font
-      git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
-      mv ~/powerlevel10k ~/.powerlevel10k
-      echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
+      echo "Do you want to install oh-my-zsh [y/N]:"
+      read zsh_option
+      if [ "$zsh_option" = "y" ] || [ "$zsh_option" = "Y" ]; then
+        echo "Configuring ohmyzsh..."
+        sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-      # update ohmyzsh
-      sed 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/g' ~/.zshrc
-      if grep -q "ZSH_THEME=\"robbyrussell\"" ~/.zshrc; then
-        sed 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/g' ~/.zshrc > zshrc.txt
-        cp zshrc.txt ~/.zshrc
-        rm zshrc.txt
-      else 
-        echo "failed updating zsh theme, not existing line: ZSH_THEME=\"robbyrussell\""
+        # intall Powerlevel10k for font
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
+        mv ~/powerlevel10k ~/.powerlevel10k
+        echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
+
+        # set theme to agnoster
+        sed 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/g' ~/.zshrc
+        if grep -q "ZSH_THEME=\"robbyrussell\"" ~/.zshrc; then
+          sed 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/g' ~/.zshrc > zshrc.txt
+          cp zshrc.txt ~/.zshrc
+          rm zshrc.txt
+        else 
+          echo "failed updating zsh theme, not existing line: ZSH_THEME=\"robbyrussell\""
+        fi
+        # permission issues https://github.com/ohmyzsh/ohmyzsh/issues/6835#issuecomment-390216875
+        echo "skip fixing permission issues..."
+        #echo "ZSH_DISABLE_COMPFIX=true" >> ~/.zshrc
+        # TODO the variable must be before oh-my-zsh.sh is sourced.
+      else
+        echo "Skip to configure ohmyzsh"
       fi
-      # permission issues https://github.com/ohmyzsh/ohmyzsh/issues/6835#issuecomment-390216875
-      echo "skip fixing permission issues..."
-      #echo "ZSH_DISABLE_COMPFIX=true" >> ~/.zshrc
-      # TODO the variable must be before oh-my-zsh.sh is sourced.
     fi
+  else
+    echo "zsh hadn't been installed! Skip configuration"
   fi
 
   # install tmux
-  if ! which tmux &> /dev/null; then
-    echo "tmux is not installed!"
-  else
+  if hash tmux 2> /dev/null; then
     if [ -f "~/.tmux" ]; then
-      echo "tmux is already installed"
+      echo "tmux is already installed and configured"
     else
-      echo "Configuring tmux..."
-      git clone https://github.com/samoshkin/tmux-config.git
-      ./tmux-config/install.sh
+      echo "Do you want to configure tmux [y/N]:"
+      read tmux_option
+      if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
+        echo "Configuring tmux..."
+        git clone https://github.com/samoshkin/tmux-config.git
+        ./tmux-config/install.sh
 
-      # remove the project
-      rm -rf tmux-config
+        # remove the project
+        rm -rf tmux-config
 
-      # fix bug (add backslash before {, } and \)
-      if grep -q "unbind }    # swap-pane -D" ~/.tmux.conf; then
-        sed 's/unbind }    # swap-pane -D/unbind \\}    # swap-pane -D/g' ~/.tmux.conf > tmux.txt
-        cp tmux.txt ~/.tmux.conf
-        rm tmux.txt
-      else 
-        echo "failed fixing, not existing line: unbind }    # swap-pane -D"
-      fi
-      if grep -q "unbind {    # swap-pane -U" ~/.tmux.conf; then
-        sed 's/unbind {    # swap-pane -U/unbind \\{    # swap-pane -U/g' ~/.tmux.conf > tmux.txt
-        cp tmux.txt ~/.tmux.conf
-        rm tmux.txt
-      else 
-        echo "failed fixing, not existing line: unbind {    # swap-pane -U"
-      fi
-      if grep -q "bind \\\\ if" ~/.tmux.conf; then
-        sed 's/bind \\ if/bind \\\\ if/g' ~/.tmux.conf > tmux.txt
-        cp tmux.txt ~/.tmux.conf
-        rm tmux.txt
-      else 
-        echo "failed fixing, not existing line: bind \\ if"
+        # fix bug (add backslash before {, } and \)
+        if grep -q "unbind }    # swap-pane -D" ~/.tmux.conf; then
+          sed 's/unbind }    # swap-pane -D/unbind \\}    # swap-pane -D/g' ~/.tmux.conf > tmux.txt
+          cp tmux.txt ~/.tmux.conf
+          rm tmux.txt
+        else 
+          echo "failed fixing, not existing line: unbind }    # swap-pane -D"
+        fi
+        if grep -q "unbind {    # swap-pane -U" ~/.tmux.conf; then
+          sed 's/unbind {    # swap-pane -U/unbind \\{    # swap-pane -U/g' ~/.tmux.conf > tmux.txt
+          cp tmux.txt ~/.tmux.conf
+          rm tmux.txt
+        else 
+          echo "failed fixing, not existing line: unbind {    # swap-pane -U"
+        fi
+        if grep -q "bind \\\\ if" ~/.tmux.conf; then
+          sed 's/bind \\ if/bind \\\\ if/g' ~/.tmux.conf > tmux.txt
+          cp tmux.txt ~/.tmux.conf
+          rm tmux.txt
+        else 
+          echo "failed fixing, not existing line: bind \\ if"
+        fi
+      else
+        echo "Skip to configure tmux"
       fi
     fi
+  else
+    echo "tmux hadn't been installed! Skip configuration"
   fi
+}
+
+# configure to use vi
+configure_git_to_use_vim()
+{
+  echo "use vim on git commit"
+  git config --global core.editor "vim"
 }
 
 # MacOS
@@ -89,18 +109,22 @@ macos()
   brew update
   brew upgrade
   
-  # install git and ssh
   for val in $TO_INSTALL; do
-    # command -v or which 
-    if ! which $val &> /dev/null; then
-      brew install $val
-      # outdated: brew install --build-from-source tmux
+    if hash $val 2> /dev/null; then
+      echo "Do you want to install $val [y/N]:"
+      read val_option
+      if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
+        brew install $val
+      else
+        echo "Skip to install $val"
+      fi
     else
-      echo “$val already installed”
+      echo "$val already installed"
     fi
   done
 
   # configure
+  configure_git_to_use_vim
   ohmyzshAndTmux
 
   # install vscode
@@ -121,21 +145,22 @@ ubuntu()
   sudo apt-get update -y
   sudo apt-get upgrade -y
 
-  # install git and ssh
   for val in $TO_INSTALL; do
-    # command -v or which
-    if ! which $val &> /dev/null; then
-      sudo apt-get install $val -y
+    if hash $val 2> /dev/null; then
+      echo "Do you want to install $val [y/N]:"
+      read val_option
+      if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
+        sudo apt-get install $val -y
+      else
+        echo "Skip to install $val"
+      fi
     else
-      echo “$val already installed”
+      echo "$val already installed"
     fi
   done
 
-  # configure to use vi
-  echo "use vi on git commit"
-  git config --global core.editor "vi"
-
   # configure
+  configure_git_to_use_vim
   ohmyzshAndTmux
 
   # install vscode
