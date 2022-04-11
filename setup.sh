@@ -104,7 +104,7 @@ setup_git()
     git config --global user.email "$git_email"
     echo "Check your git email by executing: git config --global user.email"
 
-
+    # setting up ssh key pair
     if hash ssh-keygen 2> /dev/null; then
       echo "Do you want to setup ssh keypair? [y/N]"
       read ssh_keypair
@@ -123,7 +123,7 @@ setup_git()
       echo "ssh-keygen isn't installed"
     fi
     
-
+    # setting up pgp key pair
     if hash gpg 2> /dev/null; then
       echo "Do you want to setup pgp keypair? [y/N]"
       read pgp_keypair
@@ -151,6 +151,7 @@ setup_git()
 
   else
     echo "git is not installed. Skip configuring git."
+  fi
 }
 
 # MacOS
