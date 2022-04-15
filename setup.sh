@@ -18,20 +18,6 @@ ohmyzshAndTmux() {
         git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
         mv ~/powerlevel10k ~/.powerlevel10k
         echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
-
-        # set theme to agnoster
-        sed 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/g' ~/.zshrc
-        if grep -q "ZSH_THEME=\"robbyrussell\"" ~/.zshrc; then
-          sed 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/g' ~/.zshrc > zshrc.txt
-          cp zshrc.txt ~/.zshrc
-          rm zshrc.txt
-        else 
-          echo "failed updating zsh theme, not existing line: ZSH_THEME=\"robbyrussell\""
-        fi
-        # permission issues https://github.com/ohmyzsh/ohmyzsh/issues/6835#issuecomment-390216875
-        echo "skip fixing permission issues..."
-        #echo "ZSH_DISABLE_COMPFIX=true" >> ~/.zshrc
-        # TODO the variable must be before oh-my-zsh.sh is sourced.
       else
         echo "Skip to configure ohmyzsh"
       fi
@@ -50,34 +36,20 @@ ohmyzshAndTmux() {
       read tmux_option
       if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
         echo "Configuring tmux..."
-        git clone https://github.com/samoshkin/tmux-config.git
-        ./tmux-config/install.sh
+        echo "Download conf files from https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ onto ~/.tmux"
+        mkdir ~/.tmux
+        curl https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/.tmux_dark.conf --output ~/.tmux/.tmux_dark.conf
+        curl https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/.tmux_light.conf --output ~/.tmux/.tmux_light.conf
 
-        # remove the project
-        rm -rf tmux-config
-
-        # fix bug (add backslash before {, } and \)
-        if grep -q "unbind }    # swap-pane -D" ~/.tmux.conf; then
-          sed 's/unbind }    # swap-pane -D/unbind \\}    # swap-pane -D/g' ~/.tmux.conf > tmux.txt
-          cp tmux.txt ~/.tmux.conf
-          rm tmux.txt
-        else 
-          echo "failed fixing, not existing line: unbind }    # swap-pane -D"
+        echo "Want to set darkmode? [y/N]"
+        read dark_mode
+        if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
+          tmux source-file ~/.tmux/.tmux_dark.conf
+        else
+          tmux source-file ~/.tmux/.tmux_light.conf
         fi
-        if grep -q "unbind {    # swap-pane -U" ~/.tmux.conf; then
-          sed 's/unbind {    # swap-pane -U/unbind \\{    # swap-pane -U/g' ~/.tmux.conf > tmux.txt
-          cp tmux.txt ~/.tmux.conf
-          rm tmux.txt
-        else 
-          echo "failed fixing, not existing line: unbind {    # swap-pane -U"
-        fi
-        if grep -q "bind \\\\ if" ~/.tmux.conf; then
-          sed 's/bind \\ if/bind \\\\ if/g' ~/.tmux.conf > tmux.txt
-          cp tmux.txt ~/.tmux.conf
-          rm tmux.txt
-        else 
-          echo "failed fixing, not existing line: bind \\ if"
-        fi
+        echo "Checkout https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ to setup alias"
+        read -p "Press enter to continue"
       else
         echo "Skip to configure tmux"
       fi
@@ -161,7 +133,7 @@ setup_git() {
 # MacOS
 macos()
 {
-  echo “Detect Mac OS”
+  echo "Detected Mac OS"
   # install homebew if it is not already installed
   if hash brew 2> /dev/null; then
     echo "homebrew already installed"
@@ -235,11 +207,23 @@ macos()
 # linux ubuntu
 ubuntu()
 {
-  echo “Detect Linux Ubuntu”
+  echo "Detected Linux Ubuntu"
+
+  DOCKER_FLAG=0
+  # file exist then it is a docker container
+  if [ -f "/.dockerenv" ]; then
+    echo "Detected Docker Container"
+    DOCKER_FLAG=1
+  fi
   # update and upgrade
   echo "Updating and upgrading..."
-  sudo apt-get update -y
-  sudo apt-get upgrade -y
+  if [ $DOCKER_FLAG = 0 ]; then
+    sudo apt-get update -y
+    sudo apt-get upgrade -y
+  else
+    apt-get update -y
+    apt-get upgrade -y
+  fi
 
   for val in $TO_INSTALL; do
     if hash $val 2> /dev/null; then
@@ -248,7 +232,11 @@ ubuntu()
       echo "Do you want to install $val [y/N]:"
       read val_option
       if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
-        sudo apt-get install $val -y
+        if [ $DOCKER_FLAG = 0 ]; then
+          sudo apt-get install $val -y
+        else
+          apt-get install $val -y
+        fi
       else
         echo "Skip to install $val"
       fi
@@ -258,6 +246,11 @@ ubuntu()
   # configure
   ohmyzshAndTmux
   setup_git
+
+  # docker stops here
+  if [ $DOCKER_FLAG = 1 ]; then
+    exit 0
+  fi
 
   # install vscode
   if hash code 2> /dev/null; then
