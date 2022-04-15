@@ -6,8 +6,10 @@ TO_INSTALL="git ssh gpg zsh curl tmux vim"
 ohmyzshAndTmux() {
   # install ohmyzsh if zsh is installed
   if hash zsh 2> /dev/null; then
-    # if ~/.oh-my-zsh does not exist, then we assume that it is not configured
-    if [ -f "~/.oh-my-zsh" ]; then
+    if [ -d "$(pwd)/.oh-my-zsh" ]; then
+      # if directory ~/.oh-my-zsh exists, then we assume that it is configured
+      echo "ohmyzsh is already installed and configured"
+    else
       echo "Do you want to install oh-my-zsh [y/N]:"
       read zsh_option
       if [ "$zsh_option" = "y" ] || [ "$zsh_option" = "Y" ]; then
@@ -21,8 +23,6 @@ ohmyzshAndTmux() {
       else
         echo "Skip to configure ohmyzsh"
       fi
-    else
-      echo "ohmyzsh is already installed and configured"
     fi
   else
     echo "zsh hadn't been installed! Skip configuration"
@@ -30,8 +30,10 @@ ohmyzshAndTmux() {
 
   # configure tmux if tmux is installed 
   if hash tmux 2> /dev/null; then
-    # if ~/.tmux does not exist, then we assume that it is not configured
-    if [ -f "~/.tmux" ]; then
+    if [ -d "$(pwd)/.tmux" ]; then
+      # if directory ~/.tmux exists, then we assume that it is configured
+      echo "tmux is already configured"
+    else
       echo "Do you want to configure tmux [y/N]:"
       read tmux_option
       if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
@@ -53,8 +55,6 @@ ohmyzshAndTmux() {
       else
         echo "Skip to configure tmux"
       fi
-    else
-      echo "tmux is already installed and configured"
     fi
   else
     echo "tmux hadn't been installed! Skip configuration"
