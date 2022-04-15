@@ -6,7 +6,7 @@ TO_INSTALL="git ssh gpg zsh curl tmux vim"
 ohmyzshAndTmux() {
   # install ohmyzsh if zsh is installed
   if hash zsh 2> /dev/null; then
-    if [ -d "$(pwd)/.oh-my-zsh" ]; then
+    if [ -d "$HOME/.oh-my-zsh" ]; then
       # if directory ~/.oh-my-zsh exists, then we assume that it is configured
       echo "ohmyzsh is already installed and configured"
     else
@@ -14,7 +14,7 @@ ohmyzshAndTmux() {
       read zsh_option
       if [ "$zsh_option" = "y" ] || [ "$zsh_option" = "Y" ]; then
         echo "Configuring ohmyzsh..."
-        sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
         # intall Powerlevel10k for font
         git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
@@ -30,7 +30,7 @@ ohmyzshAndTmux() {
 
   # configure tmux if tmux is installed 
   if hash tmux 2> /dev/null; then
-    if [ -d "$(pwd)/.tmux" ]; then
+    if [ -d "$HOME/.tmux" ]; then
       # if directory ~/.tmux exists, then we assume that it is configured
       echo "tmux is already configured"
     else
@@ -40,8 +40,8 @@ ohmyzshAndTmux() {
         echo "Configuring tmux..."
         echo "Download conf files from https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ onto ~/.tmux"
         mkdir ~/.tmux
-        curl https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/.tmux_dark.conf --output ~/.tmux/.tmux_dark.conf
-        curl https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/.tmux_light.conf --output ~/.tmux/.tmux_light.conf
+        curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/.tmux_dark.conf --output ~/.tmux/.tmux_dark.conf
+        curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/.tmux_light.conf --output ~/.tmux/.tmux_light.conf
 
         echo "Want to set darkmode? [y/N]"
         read dark_mode
