@@ -20,7 +20,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/shenggwang/bootstrap_scr
 * no cache to force a clean build
 * tag the container with given name
 ```shell
-docker build https://github.com/shenggwang/bootstrap_scripts/blob/main/Dockerfile --no-cache --tag per_dev:1.0
+docker build https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/Dockerfile --no-cache --tag per_dev:1.0
 ```
 #### run
 * Run ubuntu image with name per_dev
