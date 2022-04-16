@@ -1,14 +1,14 @@
 # Tmux
 
 Two .tmux-conf files. Only visually differ.
-* .tmux_dark.conf
-* .tmux_light.conf
+* tmux_dark.conf
+* tmux_light.conf
 
 ## toggle between modes
 Download the above two files to `~/.tmux` and adds the following alias to shell run commands (zshrc, bashrc, etc).
 ``` shell
-alias od='tmux source-file ~/.tmux/.tmux_dark.conf'
-alias ld='tmux source-file ~/.tmux/.tmux_light.conf'
+alias od='tmux source-file ~/.tmux/tmux_dark.conf'
+alias ld='tmux source-file ~/.tmux/tmux_light.conf'
 ```
 Reload the rc file. Now you should be able to switch between two modes by executing `od` or `ol`
 

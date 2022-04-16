@@ -47,9 +47,9 @@ ohmyzshAndTmux() {
         echo "Want to set default to darkmode? [y/N]"
         read dark_mode
         if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
-          ln -s ~/.tmux/.tmux_dark.conf ~/.tmux.conf
+          ln -s ~/.tmux/tmux_dark.conf ~/.tmux.conf
         else
-          ln -s ~/.tmux/.tmux_light.conf ~/.tmux.conf
+          ln -s ~/.tmux/tmux_light.conf ~/.tmux.conf
         fi
         echo "Checkout https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ to setup alias"
         read -p "Press enter to continue"
