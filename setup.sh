@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 TO_INSTALL="git ssh gpg zsh curl tmux vim"
 
@@ -38,17 +38,21 @@ ohmyzshAndTmux() {
       read tmux_option
       if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
         echo "Configuring tmux..."
+        
+        echo "alias od='tmux source-file ~/.tmux/.tmux_dark.conf'" >> .zshrc
+        echo "alias ld='tmux source-file ~/.tmux/.tmux_light.conf'" >> .zshrc
+
         echo "Download conf files from https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ onto ~/.tmux"
         mkdir ~/.tmux
         curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/.tmux_dark.conf --output ~/.tmux/.tmux_dark.conf
         curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/.tmux_light.conf --output ~/.tmux/.tmux_light.conf
 
-        echo "Want to set darkmode? [y/N]"
+        echo "Want to set default to darkmode? [y/N]"
         read dark_mode
         if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
-          tmux source-file ~/.tmux/.tmux_dark.conf
+          ln -s ~/tmux/.tmux_dark.conf ~/.tmux.conf
         else
-          tmux source-file ~/.tmux/.tmux_light.conf
+          ln -s ~/tmux/.tmux_light.conf ~/.tmux.conf
         fi
         echo "Checkout https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ to setup alias"
         read -p "Press enter to continue"
@@ -209,21 +213,9 @@ ubuntu()
 {
   echo "Detected Linux Ubuntu"
 
-  DOCKER_FLAG=0
-  # file exist then it is a docker container
-  if [ -f "/.dockerenv" ]; then
-    echo "Detected Docker Container"
-    DOCKER_FLAG=1
-  fi
   # update and upgrade
-  echo "Updating and upgrading..."
-  if [ $DOCKER_FLAG = 0 ]; then
-    sudo apt-get update -y
-    sudo apt-get upgrade -y
-  else
-    apt-get update -y
-    apt-get upgrade -y
-  fi
+  sudo apt-get update -y
+  sudo apt-get upgrade -y
 
   for val in $TO_INSTALL; do
     if hash $val 2> /dev/null; then
@@ -232,11 +224,7 @@ ubuntu()
       echo "Do you want to install $val [y/N]:"
       read val_option
       if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
-        if [ $DOCKER_FLAG = 0 ]; then
-          sudo apt-get install $val -y
-        else
-          apt-get install $val -y
-        fi
+        sudo apt-get install $val -y
       else
         echo "Skip to install $val"
       fi
@@ -246,11 +234,6 @@ ubuntu()
   # configure
   ohmyzshAndTmux
   setup_git
-
-  # docker stops here
-  if [ $DOCKER_FLAG = 1 ]; then
-    exit 0
-  fi
 
   # install vscode
   if hash code 2> /dev/null; then
@@ -265,11 +248,41 @@ ubuntu()
   echo "Finished"
 }
 
+# docker container with linux ubuntu
+docker_setup ()
+{
+  apt-get -y update && apt-get -y upgrade
+
+  # just in case
+  for val in $TO_INSTALL; do
+    if hash $val 2> /dev/null; then
+      echo "$val already installed"
+    else
+      echo "Do you want to install $val [y/N]:"
+      read val_option
+      if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
+        apt-get install $val -y
+      else
+        echo "Skip to install $val"
+      fi
+    fi
+  done
+
+  # configure
+  ohmyzshAndTmux
+  setup_git
+}
+
 # if macos
 if [[ "$OSTYPE" == "darwin"* ]]; then
   macos
   exit 0
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  ubuntu
+  # file exist then it is a docker container
+  if [ -f "/.dockerenv" ]; then
+    docker_setup
+  else
+    ubuntu
+  fi
   exit 0
 fi
