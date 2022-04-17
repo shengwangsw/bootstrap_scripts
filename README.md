@@ -67,3 +67,14 @@ docker images -q -f dangling=true
 ```shell
 docker rmi $(docker images -q -f dangling=true)
 ```
+
+## Config
+* .zshrc
+    * change ZSH_THEME
+    * add alias for tmux mode
+* execute to configure powerlevel10k
+    ```shell
+    p10k configure
+    ```
+* Reload tmux config
+    * prefix + r

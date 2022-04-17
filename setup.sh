@@ -41,12 +41,12 @@ ohmyzshAndTmux() {
 
         echo "Download conf files from https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ onto ~/.tmux"
         mkdir ~/.tmux
-        curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/.tmux_dark.conf --output ~/.tmux/.tmux_dark.conf
-        curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/.tmux_light.conf --output ~/.tmux/.tmux_light.conf
+        curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/tmux_dark.conf --output ~/.tmux/tmux_dark.conf
+        curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/tmux_light.conf --output ~/.tmux/tmux_light.conf
 
         echo "Want to set default to darkmode? [y/N]"
         read dark_mode
-        if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
+        if [ "$dark_mode" = "y" ] || [ "$dark_mode" = "Y" ]; then
           ln -s ~/.tmux/tmux_dark.conf ~/.tmux.conf
         else
           ln -s ~/.tmux/tmux_light.conf ~/.tmux.conf
