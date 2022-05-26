@@ -9,6 +9,14 @@ Download the above two files to `~/.tmux` and adds the following alias to shell 
 ``` shell
 alias od='tmux source-file ~/.tmux/tmux_dark.conf'
 alias ld='tmux source-file ~/.tmux/tmux_light.conf'
+
+# to remove dark_blue
+LS_COLORS=$LS_COLORS:'di=0;36' ; export LS_COLORS
+PS1='[\033[1;36m]\u[\033[1;31m]@[\033[1;32m]\h:[\033[1;35m]\w[\033[1;31m]$[\033[0m] '
+```
+Remove dark blue in vim, create .vimrc and add following line
+```
+:color desert
 ```
 Reload the rc file. Now you should be able to switch between two modes by executing `od` or `ol`
 
