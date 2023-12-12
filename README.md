@@ -9,18 +9,18 @@ The current repository stores scripts for bootstrapping OS (Operating System) wi
 If you already have curl, you can simply run
 ### Linux or Macos
 ```shell
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/setup.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/setup.sh)"
 ```
 ### Raspberry pi
 ```shell
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/setup_rasp.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/setup_rasp.sh)"
 ```
 ### Docker container
 #### build
 * no cache to force a clean build
 * tag the container with given name
 ```shell
-docker build https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/Dockerfile --no-cache --tag per_dev:1.0
+docker build https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/Dockerfile --no-cache --tag per_dev:1.0
 ```
 #### run
 * Run ubuntu image with name per_dev
@@ -38,7 +38,7 @@ docker run --detach --interactive --hostname home.env --name per_dev --volume ~/
 * Workdir set to the container user path
 
 ``` shell
-docker exec --interactive --tty --workdir /root per_dev bash -c "$(curl -fsSL https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/setup.sh)"
+docker exec --interactive --tty --workdir /root per_dev bash -c "$(curl -fsSL https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/setup.sh)"
 ```
 #### get in to the terminal
 ```shell
