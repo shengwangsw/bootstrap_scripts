@@ -39,10 +39,10 @@ ohmyzshAndTmux() {
       if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
         echo "Configuring tmux..."
 
-        echo "Download conf files from https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ onto ~/.tmux"
+        echo "Download conf files from https://github.com/shengwangsw/bootstrap_scripts/blob/main/tmux/ onto ~/.tmux"
         mkdir ~/.tmux
-        curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/tmux_dark.conf --output ~/.tmux/tmux_dark.conf
-        curl https://raw.githubusercontent.com/shenggwang/bootstrap_scripts/main/tmux/tmux_light.conf --output ~/.tmux/tmux_light.conf
+        curl https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/tmux/tmux_dark.conf --output ~/.tmux/tmux_dark.conf
+        curl https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/tmux/tmux_light.conf --output ~/.tmux/tmux_light.conf
 
         echo "Want to set default to darkmode? [y/N]"
         read dark_mode
@@ -51,7 +51,7 @@ ohmyzshAndTmux() {
         else
           ln -s ~/.tmux/tmux_light.conf ~/.tmux.conf
         fi
-        echo "Checkout https://github.com/shenggwang/bootstrap_scripts/blob/main/tmux/ to setup alias"
+        echo "Checkout https://github.com/shengwangsw/bootstrap_scripts/blob/main/tmux/ to setup alias"
         read -p "Press enter to continue"
       else
         echo "Skip to configure tmux"
