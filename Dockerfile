@@ -1,7 +1,7 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TERM xterm-256color
+ENV TERM=xterm-256color
 WORKDIR /root
 
 RUN apt-get -y update && apt-get -y upgrade

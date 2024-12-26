@@ -2,8 +2,7 @@
 
 TO_INSTALL="git ssh gpg zsh curl tmux vim"
 
-# ohmyzsh
-ohmyzshAndTmux() {
+setup_ohmyzsh() {
   # install ohmyzsh if zsh is installed
   if hash zsh 2> /dev/null; then
     if [ -d "$HOME/.oh-my-zsh" ]; then
@@ -13,13 +12,20 @@ ohmyzshAndTmux() {
       echo "Do you want to install oh-my-zsh [y/N]:"
       read zsh_option
       if [ "$zsh_option" = "y" ] || [ "$zsh_option" = "Y" ]; then
+        echo "Executing `git config --global --add safe.directory '*'` to allow cloning ohmyzsh"
+        git config --global --add safe.directory '*'
         echo "Configuring ohmyzsh..."
         sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-
-        # intall Powerlevel10k for font
-        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
-        mv ~/powerlevel10k ~/.powerlevel10k
-        echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
+        echo "Executing `git config --global --unset safe.directory '*'` to allow cloning ohmyzsh"
+        git config --global --unset safe.directory '*'
+        echo "Manually check `git config --global --get-all safe.directory` if safe.directory were removed."
+        echo "If not you can do it manually in ~/.gitconfig."
+        if [ -d "$HOME/.oh-my-zsh" ]; then
+          # if directory ~/.oh-my-zsh exists, then we install powerlevel10k for font
+          git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
+          mv ~/powerlevel10k ~/.powerlevel10k
+          echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
+        fi
       else
         echo "Skip to configure ohmyzsh"
       fi
@@ -27,7 +33,9 @@ ohmyzshAndTmux() {
   else
     echo "zsh hadn't been installed! Skip configuration"
   fi
+}
 
+setup_tmux() {
   # configure tmux if tmux is installed 
   if hash tmux 2> /dev/null; then
     if [ -d "$HOME/.tmux" ]; then
@@ -65,7 +73,6 @@ ohmyzshAndTmux() {
 # configure git
 setup_git() {
   if hash git 2> /dev/null; then
-
     echo "Set git username, email, and commit to use vim [y/N]"
     read git_config
     if [ "$git_config" = "y" ] || [ "$git_config" = "Y" ]; then
@@ -87,7 +94,7 @@ setup_git() {
       read ssh_keypair
       if [ "$ssh_keypair" = "y" ] || [ "$ssh_keypair" = "Y" ]; then
         ssh-keygen -t rsa
-        echo "Write here the full path to your public key [e.g. /home/user/.ssh/id_rsa.pub]"
+        echo "Write here the full path to your public key [e.g. $HOME/.ssh/id_rsa.pub]"
         read ssh_pub_key
         echo "copy the ssh public key to your git profile."
         cat "$ssh_pub_key"
@@ -189,8 +196,9 @@ macos()
   fi
 
   # configure
-  ohmyzshAndTmux
   setup_git
+  setup_ohmyzsh
+  setup_tmux
 
   # install vscode
   if hash code 2> /dev/null; then
@@ -229,8 +237,9 @@ ubuntu()
   done
 
   # configure
-  ohmyzshAndTmux
   setup_git
+  setup_ohmyzsh
+  setup_tmux
 
   # install vscode
   if hash code 2> /dev/null; then
@@ -266,8 +275,9 @@ docker_setup ()
   done
 
   # configure
-  ohmyzshAndTmux
   setup_git
+  setup_ohmyzsh
+  setup_tmux
 }
 
 # if macos

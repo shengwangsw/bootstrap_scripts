@@ -18,12 +18,12 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/shengwangsw/bootstrap_sc
 ### Docker container
 #### build
 * no cache to force a clean build
-* tag the container with given name
+* tag the container with a name (here we use per_dev)
 ```shell
 docker build https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/Dockerfile --no-cache --tag per_dev:1.0
 ```
 #### run
-* Run ubuntu image with name per_dev
+* Run Ubuntu image with the given name (per_dev)
 * Detach to run container in background
 * Interactive to make container waiting for input (not exiting)
 * Volume mounted to ~/Personal in order to keep the data when the container is killed
@@ -43,6 +43,33 @@ docker exec --interactive --tty --workdir /root per_dev bash -c "$(curl -fsSL ht
 #### get in to the terminal
 ```shell
 docker exec --interactive --tty --workdir /root per_dev tmux new -s session
+```
+
+#### Upgrade Ubuntu Major version
+When a version of Ubuntu in the container reaches EoL, we can either build the image or upgrade it within the container.
+The former is easier since the workspace is within a folder named `/Personal`. We won't lose data, only the settings.
+The latter requires entering the container and upgrading it manually. Follow the below commands to achieve it.
+```shell
+docker exec -it per_dev /bin/bash
+```
+Within the container:
+```shell
+apt-get update
+apt-get dist-upgrade
+apt-get install -y update-manager-core
+
+do-release-upgrade
+apt-get autoremove -y
+apt-get clean
+```
+Exit the container and run:
+```shell
+docker restart per_dev
+```
+To check the Ubuntu version:
+```shell
+lsb_release -a
+cat /etc/os-release
 ```
 
 ### Docker clean up
