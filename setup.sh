@@ -1,30 +1,31 @@
 #!/bin/bash
+set -euo pipefail
 
 TO_INSTALL="git ssh gpg zsh curl tmux vim"
 
 setup_ohmyzsh() {
   # install ohmyzsh if zsh is installed
-  if hash zsh 2> /dev/null; then
+  if command -v zsh >/dev/null 2>&1; then
     if [ -d "$HOME/.oh-my-zsh" ]; then
       # if directory ~/.oh-my-zsh exists, then we assume that it is configured
       echo "ohmyzsh is already installed and configured"
     else
       echo "Do you want to install oh-my-zsh [y/N]:"
-      read zsh_option
+      read -r zsh_option
       if [ "$zsh_option" = "y" ] || [ "$zsh_option" = "Y" ]; then
-        echo "Executing `git config --global --add safe.directory '*'` to allow cloning ohmyzsh"
-        git config --global --add safe.directory '*'
         echo "Configuring ohmyzsh..."
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-        echo "Executing `git config --global --unset safe.directory '*'` to allow cloning ohmyzsh"
-        git config --global --unset safe.directory '*'
-        echo "Manually check `git config --global --get-all safe.directory` if safe.directory were removed."
-        echo "If not you can do it manually in ~/.gitconfig."
+        export ZSH="$HOME/.oh-my-zsh"
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
         if [ -d "$HOME/.oh-my-zsh" ]; then
-          # if directory ~/.oh-my-zsh exists, then we install powerlevel10k for font
           git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
           mv ~/powerlevel10k ~/.powerlevel10k
-          echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> ~/.zshrc
+          if [ -f "$HOME/.zshrc" ]; then
+            if ! grep -q "powerlevel10k.zsh-theme" "$HOME/.zshrc" 2>/dev/null; then
+              echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> "$HOME/.zshrc"
+            fi
+          else
+            echo 'source ~/.powerlevel10k/powerlevel10k.zsh-theme' >> "$HOME/.zshrc"
+          fi
         fi
       else
         echo "Skip to configure ohmyzsh"
@@ -37,23 +38,23 @@ setup_ohmyzsh() {
 
 setup_tmux() {
   # configure tmux if tmux is installed 
-  if hash tmux 2> /dev/null; then
+  if command -v tmux >/dev/null 2>&1; then
     if [ -d "$HOME/.tmux" ]; then
       # if directory ~/.tmux exists, then we assume that it is configured
       echo "tmux is already configured"
     else
       echo "Do you want to configure tmux [y/N]:"
-      read tmux_option
+      read -r tmux_option
       if [ "$tmux_option" = "y" ] || [ "$tmux_option" = "Y" ]; then
         echo "Configuring tmux..."
 
         echo "Download conf files from https://github.com/shengwangsw/bootstrap_scripts/blob/main/tmux/ onto ~/.tmux"
-        mkdir ~/.tmux
-        curl https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/tmux/tmux_dark.conf --output ~/.tmux/tmux_dark.conf
-        curl https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/tmux/tmux_light.conf --output ~/.tmux/tmux_light.conf
+        mkdir -p ~/.tmux
+        curl -fSL https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/tmux/tmux_dark.conf --output ~/.tmux/tmux_dark.conf
+        curl -fSL https://raw.githubusercontent.com/shengwangsw/bootstrap_scripts/main/tmux/tmux_light.conf --output ~/.tmux/tmux_light.conf
 
-        echo "Want to set default to darkmode? [y/N]"
-        read dark_mode
+      echo "Want to set default to darkmode? [y/N]"
+      read -r dark_mode
         if [ "$dark_mode" = "y" ] || [ "$dark_mode" = "Y" ]; then
           ln -s ~/.tmux/tmux_dark.conf ~/.tmux.conf
         else
@@ -72,9 +73,9 @@ setup_tmux() {
 
 # configure git
 setup_git() {
-  if hash git 2> /dev/null; then
+  if command -v git >/dev/null 2>&1; then
     echo "Set git username, email, and commit to use vim [y/N]"
-    read git_config
+    read -r git_config
     if [ "$git_config" = "y" ] || [ "$git_config" = "Y" ]; then
       echo "use vim on git commit"
       git config --global core.editor "vim"
@@ -89,17 +90,20 @@ setup_git() {
     fi
 
     # setting up ssh key pair
-    if hash ssh-keygen 2> /dev/null; then
+    if command -v ssh-keygen >/dev/null 2>&1; then
       echo "Do you want to setup ssh keypair? [y/N]"
-      read ssh_keypair
+      read -r ssh_keypair
       if [ "$ssh_keypair" = "y" ] || [ "$ssh_keypair" = "Y" ]; then
         ssh-keygen -t rsa
         echo "Write here the full path to your public key [e.g. $HOME/.ssh/id_rsa.pub]"
-        read ssh_pub_key
-        echo "copy the ssh public key to your git profile."
-        cat "$ssh_pub_key"
-        read -p "Press enter to continue"
-        read to_continue
+        read -r ssh_pub_key
+        if [ -f "$ssh_pub_key" ]; then
+          echo "copy the ssh public key to your git profile."
+          cat "$ssh_pub_key"
+          read -p "Press enter to continue"
+        else
+          echo "File not found: $ssh_pub_key"
+        fi
       else
         echo "skip setting up ssh key pair"
       fi
@@ -108,9 +112,9 @@ setup_git() {
     fi
     
     # setting up pgp key pair
-    if hash gpg 2> /dev/null; then
+    if command -v gpg >/dev/null 2>&1; then
       echo "Do you want to setup pgp keypair? [y/N]"
-      read pgp_keypair
+      read -r pgp_keypair
       if [ "$pgp_keypair" = "y" ] || [ "$pgp_keypair" = "Y" ]; then
         gpg --full-gen-key
         raw_signing_key=$(gpg --list-secret-keys --keyid-format LONG)
@@ -120,7 +124,6 @@ setup_git() {
         gpg --export --armor "$signingkey"
         echo "copy the pgp public key to your git profile."
         read -p "Press enter to continue"
-        read to_continue
 
         # setup in local machine
         git config --global user.signingkey "$signingkey"
@@ -143,7 +146,7 @@ macos()
 {
   echo "Detected Mac OS"
   # install homebew if it is not already installed
-  if hash brew 2> /dev/null; then
+  if command -v brew >/dev/null 2>&1; then
     echo "homebrew already installed"
   else
     # usually curl is installed by default in MacOS
@@ -155,15 +158,15 @@ macos()
     echo "2. evaluate the brew shellenv:"
     echo "    eval \"$(/opt/homebrew/bin/brew shellenv)\""
     echo "Did you received the above steps? [y/N]"
-    read brew_steps
+    read -r brew_steps
     if [ "$brew_steps" = "y" ] || [ "$brew_steps" = "Y" ]; then
       echo "Write here the <path to profile file>:"
-      read profile_file_path
+      read -r profile_file_path
       echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$profile_file_path"
       eval "$(/opt/homebrew/bin/brew shellenv)"
     else
       echo "Do you want to exit the setup so you can do it manually? [y/N]"
-      read do_it_manually
+      read -r do_it_manually
       if [ "$do_it_manually" = "y" ] || [ "$do_it_manually" = "Y" ]; then
         exit 0;
       fi
@@ -171,17 +174,17 @@ macos()
   fi
   # new update and upgrade
   echo "Updating and upgrading..."
-  brew update
-  brew upgrade
+  brew update || true
+  brew upgrade || true
   
   for val in $TO_INSTALL; do
-    if hash $val 2> /dev/null; then
+    if command -v "$val" >/dev/null 2>&1; then
       echo "$val already installed"
     else
       echo "Do you want to install $val [y/N]:"
-      read val_option
+      read -r val_option
       if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
-        brew install $val
+        brew install "$val"
       else
         echo "Skip to install $val"
       fi
@@ -190,7 +193,7 @@ macos()
 
   # install windows manager
   echo "Do you want to install rectangle? [y/N]"
-  read rectangle_windows_manager
+  read -r rectangle_windows_manager
   if [ "$rectangle_windows_manager" = "y" ] || [ "$rectangle_windows_manager" = "Y" ]; then
     brew install --cask rectangle
   fi
@@ -201,11 +204,11 @@ macos()
   setup_tmux
 
   # install vscode
-  if hash code 2> /dev/null; then
+  if command -v code >/dev/null 2>&1; then
     echo "vscode is already installed"
   else
     echo "Do you want to install vscode [y/N]:"
-    read code_option
+    read -r code_option
     if [ "$code_option" = "y" ] || [ "$code_option" = "Y" ]; then
       brew install --cask visual-studio-code
     fi
@@ -223,13 +226,13 @@ ubuntu()
   sudo apt-get upgrade -y
 
   for val in $TO_INSTALL; do
-    if hash $val 2> /dev/null; then
+    if command -v "$val" >/dev/null 2>&1; then
       echo "$val already installed"
     else
       echo "Do you want to install $val [y/N]:"
-      read val_option
+      read -r val_option
       if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
-        sudo apt-get install $val -y
+        sudo apt-get install "$val" -y
       else
         echo "Skip to install $val"
       fi
@@ -242,11 +245,11 @@ ubuntu()
   setup_tmux
 
   # install vscode
-  if hash code 2> /dev/null; then
+  if command -v code >/dev/null 2>&1; then
     echo "vscode is already installed"
   else
     echo "Do you want to install vscode [y/N]:"
-    read code_option
+    read -r code_option
     if [ "$code_option" = "y" ] || [ "$code_option" = "Y" ]; then
       sudo snap install --classic code
     fi
@@ -261,13 +264,13 @@ docker_setup ()
 
   # just in case
   for val in $TO_INSTALL; do
-    if hash $val 2> /dev/null; then
+    if command -v "$val" >/dev/null 2>&1; then
       echo "$val already installed"
     else
       echo "Do you want to install $val [y/N]:"
-      read val_option
+      read -r val_option
       if [ "$val_option" = "y" ] || [ "$val_option" = "Y" ]; then
-        apt-get install $val -y
+        apt-get install "$val" -y
       else
         echo "Skip to install $val"
       fi
