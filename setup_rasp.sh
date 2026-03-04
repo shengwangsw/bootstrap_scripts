@@ -7,9 +7,11 @@ setupSshAuth() {
   echo "PasswordAuthentication no" | sudo tee -a /etc/ssh/sshd_config
 }
 
-if [[ "$(uname -a)" != "Linux raspberry"* ]]; then
+if [[ "$(uname -a)" == "Linux raspberry"* || "$(cat /proc/device-tree/model)" == "Raspberry Pi"* ]]; then
+  echo "This is a raspberry pi, continue setup"
+else
   # https://tldp.org/LDP/abs/html/exitcodes.html
-  echo "This is not a raspbian"
+  echo "This is not a raspberry pi"
   exit 2
 fi
 
